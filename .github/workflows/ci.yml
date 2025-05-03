@@ -1,4 +1,4 @@
-name: Run basic check before deploy
+name: Run basic check and deploy to Vercel
 
 on:
   push:
@@ -8,13 +8,33 @@ on:
 jobs:
   check-files:
     runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.check.outputs.result }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Verify index.html exists
+        id: check
         run: |
           if [ ! -f index.html ]; then
             echo "index.html not found!"
             exit 1
+          else
+            echo "index.html found. Test passed."
           fi
+
+  deploy:
+    needs: check-files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./
