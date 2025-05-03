@@ -1,0 +1,20 @@
+name: Run basic check before deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Verify index.html exists
+        run: |
+          if [ ! -f index.html ]; then
+            echo "index.html not found!"
+            exit 1
+          fi
